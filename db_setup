@@ -1,0 +1,35 @@
+import sqlite3
+
+def initialize_database():
+    """Initialize the database tables and add default categories."""
+    # Connect to the SQLite database
+    with sqlite3.connect("expenses.db") as conn:
+        cursor = conn.cursor()
+
+        # Create categories table if it doesn't exist
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL
+        )
+        """)
+
+        # Create expenses table if it doesn't exist
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            amount REAL NOT NULL,
+            category_id INTEGER,
+            date TEXT NOT NULL,
+            description TEXT,
+            FOREIGN KEY (category_id) REFERENCES categories(id)
+        )
+        """)
+
+        # Insert default categories if they don't exist
+        categories = ["Food", "Transport", "Entertainment", "Utilities"]
+        for category in categories:
+            cursor.execute("INSERT OR IGNORE INTO categories (name) VALUES (?)", (category,))
+
+        conn.commit()
+
